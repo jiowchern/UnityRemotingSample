@@ -10,24 +10,20 @@ public class Sample : MonoBehaviour {
         _Agent = Regulus.Remoting.Ghost.Native.Agent.Create();
         _Agent.Launch();
 
-        Debug.Log("開始連線...");
+        Debug.Log("begin connect...");
         _Agent.Connect("127.0.0.1", 12345).OnValue += _ConnectResult;
         _Agent.QueryNotifier<Custom.ISample>().Supply += _GetSample;
 	}
     void _GetSample(Custom.ISample sample)
     {
-        Debug.Log("取得Sample...");
+        Debug.Log("get Sample...");
         sample.Add(1, 2).OnValue += (result) => { Debug.Log(string.Format("Add(1 , 2) == {0}", result)); };
         sample.GetSubtractor().OnValue += _GetSubtractor;
-  
-
-        Debug.Log("輸入GetSeconds可以取得伺服器端物件的資料");        
-
     }
 
     private void _GetSubtractor(Custom.ISubtractor subtractor)
     {
-        Debug.Log("取得Subtractor...");
+        Debug.Log("get Subtractor...");
         subtractor.Sub(1, 2).OnValue += (result) => { Debug.Log(string.Format("Sub(1 , 2) == {0}", result)); };
     }
 
@@ -35,10 +31,10 @@ public class Sample : MonoBehaviour {
     {
         if (success)
         {
-            Debug.Log("連線成功.");
+            Debug.Log("Connect success.");
         }
         else
-            Debug.Log("連線失敗.");
+            Debug.Log("Connect fail.");
     }
 
 	// Update is called once per frame
