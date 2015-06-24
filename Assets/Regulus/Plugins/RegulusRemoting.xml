@@ -39,9 +39,15 @@
             Ping
             </summary>
         </member>
-        <member name="E:Regulus.Remoting.IAgent.DisconnectEvent">
+        <member name="E:Regulus.Remoting.IAgent.BreakEvent">
             <summary>
             與遠端發生斷線
+            呼叫Disconnect不會發生此事件
+            </summary>
+        </member>
+        <member name="P:Regulus.Remoting.IAgent.Connected">
+            <summary>
+            是否為連線狀態
             </summary>
         </member>
         <member name="T:Regulus.Remoting.ICore">
