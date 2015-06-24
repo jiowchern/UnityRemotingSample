@@ -11,8 +11,9 @@ public class Sample : MonoBehaviour {
         _Agent.Launch();
 
         Debug.Log("begin connect...");
-        _Agent.Connect("127.0.0.1", 12345).OnValue += _ConnectResult;
         _Agent.QueryNotifier<Custom.ISample>().Supply += _GetSample;
+        _Agent.Connect("127.0.0.1", 12345).OnValue += _ConnectResult;
+        
 	}
     void _GetSample(Custom.ISample sample)
     {
