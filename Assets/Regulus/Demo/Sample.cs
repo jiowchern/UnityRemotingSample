@@ -6,7 +6,7 @@ public class Sample : MonoBehaviour {
     Regulus.Remoting.IAgent _Agent;
 	// Use this for initialization
 	void Start () 
-    {
+    {        
         _Agent = Regulus.Remoting.Ghost.Native.Agent.Create();
         _Agent.Launch();
 
@@ -35,7 +35,10 @@ public class Sample : MonoBehaviour {
             Debug.Log("Connect success.");
         }
         else
-            Debug.Log("Connect fail.");
+        {
+            Debug.Log("Connect fail.");            
+        }
+            
     }
 
 	// Update is called once per frame
