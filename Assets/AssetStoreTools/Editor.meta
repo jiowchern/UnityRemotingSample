@@ -1,5 +1,7 @@
 fileFormatVersion: 2
 guid: 47c3c77b488bde14eac761a5144660ed
+labels:
+- RegulusRemote
 folderAsset: yes
 timeCreated: 1435300713
 licenseType: Pro

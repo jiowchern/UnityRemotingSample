@@ -6,14 +6,14 @@ public class Sample : MonoBehaviour {
     Regulus.Remoting.IAgent _Agent;
 
     
-    Regulus.Utility.IndependentTimer _Timer;
+    
 	// Use this for initialization
 	void Start () 
     {
-        _Timer = new Regulus.Utility.IndependentTimer( System.TimeSpan.FromSeconds( 1.0), _Init);
+        _Init();
 	}
 
-    private void _Init(long obj)
+    private void _Init()
     {
         _Agent = Regulus.Remoting.Ghost.Native.Agent.Create();
         _Agent.Launch();
@@ -22,7 +22,7 @@ public class Sample : MonoBehaviour {
         _Agent.QueryNotifier<Custom.ISample>().Supply += _GetSample;
         _Agent.Connect("localhost", 12345).OnValue += _ConnectResult;
 
-        _Timer = null;
+        
     }
     void _GetSample(Custom.ISample sample)
     {
@@ -51,12 +51,9 @@ public class Sample : MonoBehaviour {
     }
 
 	// Update is called once per frame
-	void Update () {
-        if (_Agent != null)
+	void Update () 
+    {
             _Agent.Update();
-
-        if (_Timer != null)
-            _Timer.Update();
 	}
 
     void OnDestroy()

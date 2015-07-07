@@ -7,7 +7,7 @@ public class RegulusLog : MonoBehaviour {
 
     void Awake()
     {
-        //Regulus.Utility.Log.Instance.RecordEvent += Instance_RecordEvent;
+        Regulus.Utility.Log.Instance.RecordEvent += Instance_RecordEvent;
     }
 	void Start () {
         
