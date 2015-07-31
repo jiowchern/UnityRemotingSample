@@ -61,6 +61,12 @@
             </summary>
             <param name="binder"></param>
         </member>
+        <member name="M:Regulus.Remoting.Native.PackageWriter.#ctor(System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="low_fps">保證最低fps</param>
+        </member>
         <member name="T:Regulus.Remoting.ISoulBinder">
             <summary>
             伺服器端對外綁定物件
