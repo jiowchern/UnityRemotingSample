@@ -3,7 +3,6 @@ using System.Collections;
 
 public class Server : MonoBehaviour ,
     Regulus.Utility.Console.IViewer
-
 {
 
     Custom.Appliction _Application;

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Sample : MonoBehaviour {
+public class Agent : MonoBehaviour {
 
     Regulus.Remoting.IAgent _Agent;
 
