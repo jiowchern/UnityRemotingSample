@@ -4,5 +4,5 @@
 
     void Stop();
 
-    void Color(int rgba);
+    void SetColor(float r, float g, float b);
 }

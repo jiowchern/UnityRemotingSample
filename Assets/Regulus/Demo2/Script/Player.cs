@@ -12,14 +12,12 @@ using UnityEngine;
 
 using Rect = Regulus.CustomType.Rect;
 
-internal class Controller : Regulus.Game.IUser , Regulus.Collection.IQuadObject , IController , IActor
+internal class Player : Regulus.Game.IUser , Regulus.Collection.IQuadObject , IController , IActor
 {
-    private List<Controller> _Controllers;
+    private List<Player> _Controllers;
     private readonly ISoulBinder _Binder;
 
-    private readonly QuadTree<Controller> _Map;
-
-    private int _Color;
+    private readonly QuadTree<Player> _Map;
 
     private float _Speed;
 
@@ -28,24 +26,40 @@ internal class Controller : Regulus.Game.IUser , Regulus.Collection.IQuadObject 
     private Regulus.CustomType.Vector2 _Direction;
 
     private float _View;
+    private float _Body;
 
     private Rect _Bounds;
 
     private Guid _Id;
 
-    public Controller(ISoulBinder binder, QuadTree<Controller> map)
+    private float _ColorR;
+
+    private float _ColorG;
+
+    private float _ColorB;
+
+    public Player(ISoulBinder binder, QuadTree<Player> map)
     {
         _Id = Guid.NewGuid();
         
-        _Controllers = new List<Controller>();
+        _Controllers = new List<Player>();
         _MoveTime = new TimeCounter();
         _Direction = new Regulus.CustomType.Vector2();
         _Position = new Regulus.CustomType.Vector2();
         this._Binder = binder;
         this._Map = map;
 
-        _View = 10;
+        _View = 30;
+        _Body = 2;
+        _ColorR = Regulus.Utility.Random.Instance.NextFloat(0, 1);
+        _ColorG = Regulus.Utility.Random.Instance.NextFloat(0, 1);
+        _ColorB = Regulus.Utility.Random.Instance.NextFloat(0, 1);
+
+
+        _Binder.BreakEvent += _Release;
     }
+
+    
 
     void IUser.OnKick(Guid id)
     {
@@ -74,17 +88,31 @@ internal class Controller : Regulus.Game.IUser , Regulus.Collection.IQuadObject 
 
     private void _UpdateMap()
     {
-        var halfView = _View / 2;
-        _Bounds = new Rect(_Position.X - halfView, _Position.Y - halfView, halfView, halfView);
-        if (_Speed != 0) 
-            _BoundsChanged(this , EventArgs.Empty);
+        _UpdateBounds();
 
-        var controllers = _Map.Query(_Bounds);
+        _UpdateBoardcast();
+    }
 
+    private void _UpdateBoardcast()
+    {
+        var halfView  = this._View / 2;
+        var view = new Rect(this._Position.X - halfView, this._Position.Y - halfView, _View, _View);
+        var controllers = _Map.Query(view);
         _Broadcast(controllers);
     }
 
-    
+    private void _UpdateBounds()
+    {
+        var halfBody = this._Body / 2;
+        var bounds = new Rect(this._Position.X - halfBody, this._Position.Y - halfBody, _Body, _Body);
+        if (Regulus.Utility.ValueHelper.DeepEqual(this._Bounds, bounds) == false)
+        {
+            this._Bounds = bounds;
+            if (_BoundsChanged!= null)
+                _BoundsChanged(this, new EventArgs());
+            
+        }
+    }
 
     private void _UpdateMove()
     {
@@ -95,6 +123,7 @@ internal class Controller : Regulus.Game.IUser , Regulus.Collection.IQuadObject 
 
     void Regulus.Framework.IBootable.Launch()
     {
+        _UpdateBounds();
         
         _Map.Insert(this);
         _Binder.Bind<IController>(this);        
@@ -103,8 +132,13 @@ internal class Controller : Regulus.Game.IUser , Regulus.Collection.IQuadObject 
 
     void Regulus.Framework.IBootable.Shutdown()
     {
-        
-        _Binder.Unbind<IController>(this);        
+        _Binder.BreakEvent -= _Release;
+        _Release();
+        _Binder.Unbind<IController>(this);
+    }
+
+    private void _Release()
+    {        
         _Map.Remove(this);
     }
 
@@ -134,58 +168,76 @@ internal class Controller : Regulus.Game.IUser , Regulus.Collection.IQuadObject 
     {
         _Direction.X = vectorx;
         _Direction.Y = vectory;
-        _Speed = 10;
+        _Speed = 1;
 
-        _MoveEvent(_Direction.X, _Direction.Y, _Speed);
+
+        var data = new MoveData()
+                       {
+                           VectorX = _Direction.X,
+                           VectorY = _Direction.Y,
+                           FirstX = _Position.X,
+                           FirstY = _Position.Y,
+                           Speed = _Speed
+                       };
+        _MoveEvent(data);
     }
 
-    void IController.Color(int rgba)
+    void IController.SetColor(float r, float g, float b)
     {
-        _Color = rgba;
+        _ColorR = r;
+        _ColorG = g;
+        _ColorB = b;
     }
 
-    int IActor.Color
-    {
-        get { return _Color; }
-    }
+    
 
-
-    private event Action<float, float, float> _MoveEvent;
-    event Action<float,float , float> IActor.MoveEvent
+    private event Action<MoveData> _MoveEvent;
+    event Action<MoveData> IActor.MoveEvent
     {
-        add { throw new NotImplementedException(); }
-        remove { throw new NotImplementedException(); }
-    }
-
-    float IActor.Speed
-    {
-        get
+        add
         {
-            return _Speed;
+            _MoveEvent += value;
+        }
+        remove
+        {
+            _MoveEvent -= value;
         }
     }
+    
 
 
     void IController.Stop()
     {
         _Speed = 0;
-        _MoveEvent(_Direction.X, _Direction.Y, _Speed);
+
+
+        var data = new MoveData()
+        {
+            VectorX = _Direction.X,
+            VectorY = _Direction.Y,
+            FirstX = _Position.X,
+            FirstY = _Position.Y,
+            Speed = _Speed
+        };
+
+        _MoveEvent(data);
     }
 
 
  
 
-    private void _Broadcast(IEnumerable<Controller> controllers)
+    private void _Broadcast(IEnumerable<Player> controllers)
     {
         var current = _Controllers;
 
         _BroadcastJoin(controllers.Except(current));
         _BroadcastLeft(current.Except(controllers));
 
-        _Controllers = controllers.ToList();
+        _Controllers.Clear();
+        _Controllers.AddRange(controllers);        
     }
 
-    private void _BroadcastLeft(IEnumerable<Controller> controllers)
+    private void _BroadcastLeft(IEnumerable<Player> controllers)
     {
         foreach (var controller in controllers)
         {
@@ -193,7 +245,7 @@ internal class Controller : Regulus.Game.IUser , Regulus.Collection.IQuadObject 
         }
     }
 
-    private void _BroadcastJoin(IEnumerable<Controller> controllers)
+    private void _BroadcastJoin(IEnumerable<Player> controllers)
     {
         foreach (var controller in controllers)
         {
@@ -207,5 +259,21 @@ internal class Controller : Regulus.Game.IUser , Regulus.Collection.IQuadObject 
         {
             return _Id;
         }
+    }
+
+
+    float IActor.ColorR
+    {
+        get { return _ColorR; }
+    }
+
+    float IActor.ColorG
+    {
+        get { return _ColorG; }
+    }
+
+    float IActor.ColorB
+    {
+        get { return _ColorB; }
     }
 }

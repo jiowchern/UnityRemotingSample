@@ -9,6 +9,14 @@ public class Local : MonoBehaviour {
     public Rect WindowRect;
     GUI.WindowFunction _DrawWindow;
 
+    public GameObject WorldPrefab;
+    public GameObject ControllerPrefab;
+
+
+    void OnDestroy()
+    {
+        _Machine.Termination();
+    }
     // Use this for initialization
     void Start()
     {
@@ -48,7 +56,7 @@ public class Local : MonoBehaviour {
 
     private void _ToGaming(IAgent agent)
     {
-        var stage = new LocalGamingStage(agent);
+        var stage = new LocalGamingStage(agent, WorldPrefab, ControllerPrefab);
         stage.DoneEvent += _ToSetting;        
         _DrawWindow = stage.DrawWindow;
         _Machine.Push(stage);

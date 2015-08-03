@@ -8,20 +8,20 @@ using UnityEngine.SocialPlatforms.GameCenter;
 
 internal class HostCore : ICore
 {
-    private Regulus.Collection.QuadTree<Controller> _Map;
+    private Regulus.Collection.QuadTree<Player> _Map;
     private Regulus.Game.Hall _Hall;
 
     private Regulus.Utility.Updater _Updater;
     public HostCore()
     {
         _Updater = new Updater();
-        _Map = new QuadTree<Controller>(new Size(2, 2), 1000);
+        _Map = new QuadTree<Player>(new Size(4, 4), 1000);
         _Hall = new Hall();
     }
 
     void ICore.AssignBinder(ISoulBinder binder)
     {
-        var user = new Controller(binder, _Map);
+        var user = new Player(binder, _Map);
         _Hall.PushUser(user);
     }
 

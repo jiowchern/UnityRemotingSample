@@ -2,21 +2,27 @@
 using Regulus.Utility;
 
 using UnityEngine;
-using System.Linq;
+
 
 internal class LocalGamingStage : IStage
 {
-    private UnityEngine.GameObject _ActorPrefab;
 
+    private UnityEngine.GameObject _WorldPrefab;
+    private UnityEngine.GameObject _ControllerPrefab;
     public delegate void DoneCallback();
 
     public event DoneCallback DoneEvent;
     private readonly IAgent _Agent;
 
-    public LocalGamingStage(IAgent agent)
+    private World _World;
+
+    private Controller _Controller;
+
+    public LocalGamingStage(IAgent agent , UnityEngine.GameObject world_prefab , UnityEngine.GameObject controller_prefab)
     {
+        _WorldPrefab = world_prefab;
         _Agent = agent;
-        
+        _ControllerPrefab = controller_prefab;
     }
 
     void IStage.Enter()
@@ -24,34 +30,46 @@ internal class LocalGamingStage : IStage
         _Agent.BreakEvent += _Done;
 
 
-        _Agent.QueryNotifier<IActor>().Supply += _ActorJoin;
-        _Agent.QueryNotifier<IActor>().Unsupply += _ActorLeft;
+        _CreateWorld();
+        _CreateContrller();
     }
 
-    private void _ActorLeft(IActor actor)
+    private void _CreateWorld()
     {
-        var obj = (from a in UnityEngine.GameObject.FindObjectsOfType<Actor>() where a.Id == actor.Id select a.gameObject).FirstOrDefault();
-        if (obj != null)
-            UnityEngine.Object.Destroy(obj);
-        
+        var worldObject = UnityEngine.Object.Instantiate(_WorldPrefab);
+        var world = worldObject.GetComponent<World>();
+        world.Agent = _Agent;
+
+        _World = world;
     }
 
-    private void _ActorJoin(IActor actor)
+    private void _CreateContrller()
     {
-        var actorObject = UnityEngine.GameObject.Instantiate(_ActorPrefab);
-        var actorBeh = actorObject.GetComponent<Actor>();
-        actorBeh.Set(actor);
-    }
+        var controllerObject = UnityEngine.Object.Instantiate(_ControllerPrefab);
+        var controller = controllerObject.GetComponent<Controller>();
+        controller.Agent = _Agent;
 
-    private void _Done()
-    {
-        DoneEvent();
+        _Controller = controller;
     }
 
     void IStage.Leave()
     {
+        _DestroyContrller();
+        _DestroyWorld();
         _Agent.BreakEvent -= this._Done;
         _Agent.Shutdown();
+    }
+
+    private void _DestroyContrller()
+    {
+        
+        Object.Destroy(_Controller.gameObject);
+    }
+
+    private void _DestroyWorld()
+    {
+        
+        GameObject.Destroy(_World.gameObject);
     }
 
     void IStage.Update()
@@ -68,4 +86,13 @@ internal class LocalGamingStage : IStage
             _Done();
         }
     }
+
+    private void _Done()
+    {
+        DoneEvent();
+    }
+
+    
+
+    
 }

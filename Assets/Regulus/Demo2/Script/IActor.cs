@@ -4,9 +4,10 @@ public interface IActor
 {
     Guid Id { get; }
 
-    int Color { get; }
+    float ColorR { get; }
+    float ColorG { get; }
+    float ColorB { get; }
 
-    event Action<float ,float ,float> MoveEvent;
-
-    float Speed { get; }
+    event Action<MoveData> MoveEvent;
+    
 }
