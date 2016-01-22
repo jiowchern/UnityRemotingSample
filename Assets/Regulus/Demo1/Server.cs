@@ -7,8 +7,9 @@ public class Server : MonoBehaviour ,
 
     Custom.Appliction _Application;
     Regulus.Remoting.Soul.Native.Server _Server;
-	// Use this for initialization
-	void Start () {
+    
+    // Use this for initialization
+    void Start () {
         _Application = new Custom.Appliction(this);
         _Server = new Regulus.Remoting.Soul.Native.Server(_Application, 12345);
         _Server.Launch();
